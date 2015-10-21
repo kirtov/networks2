@@ -1,10 +1,8 @@
 package tr.broadcast;
 
-import com.sun.org.apache.xpath.internal.SourceTree;
 import tr.Data;
 
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -12,20 +10,20 @@ import java.util.Arrays;
 /**
  * Created by kk1 on 15.10.2015.
  */
-public class Broadcast {
+public class Message {
 
     InetAddress da,sa;
     byte fc;
     FC eFc;
     int len;
-    Data data;
+    public Data data;
     private String errorDa = "Invalid destination address ";
     private String errorSa = "Invalid source address ";
     private String createDa= "create da = ";
     private String createSa= "create sa = ";
 
 
-    public Broadcast(InetAddress da, InetAddress sa, byte fc, int len, Data data) {
+    public Message(InetAddress da, InetAddress sa, byte fc, int len, Data data) {
         this.da = da;
         this.sa = sa;
         this.fc = fc;
@@ -39,7 +37,7 @@ public class Broadcast {
         this.data = data;
     }
 
-    public Broadcast(InetAddress da, InetAddress sa, FC ffc, int len, Data data) {
+    public Message(InetAddress da, InetAddress sa, FC ffc, int len, Data data) {
         this.da = da;
         this.sa = sa;
         this.eFc = ffc;
@@ -53,13 +51,15 @@ public class Broadcast {
         this.data = data;
     }
 
-    public Broadcast (byte[] data) {
+    public Message(byte[] data) {
         fc = data[0];
         fillField(da, errorDa, 1, 5, data, createDa);
         fillField(sa, errorSa, 5, 9, data, createSa);
         len = getLength(Arrays.copyOfRange(data, 9, 13));
         if (len > 0) {
             this.data = new Data(new String(Arrays.copyOfRange(data, 13, 13 + len)));
+        } else {
+            this.data = new Data("");
         }
     }
 
@@ -69,13 +69,12 @@ public class Broadcast {
 
     private void fillField(InetAddress field, String error, int from, int to,  byte[] data, String create) {
         try {
-            System.out.println(create +new String(Arrays.copyOfRange(data,1,5)));
+            System.out.println(create + new String(Arrays.copyOfRange(data,1,5)));
             da = InetAddress.getByAddress(Arrays.copyOfRange(data,5,9));
         } catch (UnknownHostException e) {
             System.out.println(error);
         }
     }
-
 
 
     public byte[] getBytes() {

@@ -3,14 +3,14 @@ package tr;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.util.ArrayList;
 
 /**
  * Created by ks.kochetov on 16.10.2015.
  */
 public class StateMachine {
+    public int broadcastPort;
+    public int tcpPort;
     public int delay = 2000;
-    public ArrayList<InetAddress> claimTokenBuffer, ssBuffer, ss2Buffer;
     public boolean claimTokenMode, ss2Mode, ssMode;
     public InetAddress nextStation, prevStation, myAddrs;
     public boolean hasToken;

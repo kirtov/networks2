@@ -11,9 +11,9 @@ public class BroadcastSender implements Runnable {
     int port;
     InetAddress addrs;
     private DatagramSocket socket;
-    private ConcurrentLinkedQueue<Broadcast> queue;
+    private ConcurrentLinkedQueue<Message> queue;
 
-    public BroadcastSender(int port, ConcurrentLinkedQueue<Broadcast> q) throws SocketException {
+    public BroadcastSender(int port, ConcurrentLinkedQueue<Message> q) throws SocketException {
         this.port = port;
         this.queue = q;
         socket = new DatagramSocket();
@@ -22,7 +22,7 @@ public class BroadcastSender implements Runnable {
         addrs = nw.getInterfaceAddresses().get(0).getBroadcast();
     }
 
-    public void sendBroadcast(Broadcast brd) {
+    public void sendBroadcast(Message brd) {
         byte[] messageBytes = brd.getBytes();
         DatagramPacket packet = new DatagramPacket(messageBytes, messageBytes.length, addrs, port);
         try {
@@ -36,7 +36,7 @@ public class BroadcastSender implements Runnable {
     public void run() {
         while (true) {
             if (!queue.isEmpty()) {
-                Broadcast brdtoSend = queue.poll();
+                Message brdtoSend = queue.poll();
                 sendBroadcast(brdtoSend);
             } else {
                 try {

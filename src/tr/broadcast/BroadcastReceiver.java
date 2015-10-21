@@ -13,9 +13,9 @@ public class BroadcastReceiver implements Runnable {
     int port;
     int packetLen;
     private DatagramSocket socket;
-    private final ConcurrentLinkedQueue<Broadcast> queue;
+    private final ConcurrentLinkedQueue<Message> queue;
 
-    public BroadcastReceiver(int port, ConcurrentLinkedQueue<Broadcast> q) throws SocketException {
+    public BroadcastReceiver(int port, ConcurrentLinkedQueue<Message> q) throws SocketException {
         this.queue = q;
         socket = new DatagramSocket();
         this.port = port;
@@ -42,7 +42,7 @@ public class BroadcastReceiver implements Runnable {
         }
     }
 
-    private Broadcast parsePacket() {
+    private Message parsePacket() {
         return null;
     }
 }

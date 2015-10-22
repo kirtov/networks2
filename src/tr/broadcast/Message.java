@@ -11,7 +11,6 @@ import java.util.Arrays;
  * Created by kk1 on 15.10.2015.
  */
 public class Message {
-
     InetAddress da,sa;
     byte fc;
     FC eFc;
@@ -21,7 +20,6 @@ public class Message {
     private String errorSa = "Invalid source address ";
     private String createDa= "create da = ";
     private String createSa= "create sa = ";
-
 
     public Message(InetAddress da, InetAddress sa, byte fc, int len, Data data) {
         this.da = da;
@@ -76,7 +74,6 @@ public class Message {
         }
     }
 
-
     public byte[] getBytes() {
         int minLen = 1+4+4+4;
         byte[] bytes = new byte[minLen + data.getLen()];
@@ -86,6 +83,10 @@ public class Message {
         System.arraycopy(ByteBuffer.allocate(4).putInt(len).array(), 0, bytes, 9, 4);
         System.arraycopy(data.getBytes(), 0, bytes, 13, data.getLen());
         return bytes;
+    }
+
+    public InetAddress getDestinationAddress() {
+        return da;
     }
 
 }

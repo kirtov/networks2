@@ -2,6 +2,7 @@ package tr.broadcast;
 
 import tr.Data;
 import tr.StateMachine;
+import tr.utils.BroadcastResult;
 
 import java.net.InetAddress;
 import java.net.SocketException;
@@ -18,6 +19,7 @@ public class BroadcastManager {
     public static InetAddress NULL_ADDRESS;
     final ConcurrentLinkedQueue<Message> sQueue;
     final ConcurrentLinkedQueue<Message> rQueue;
+    ArrayList<InetAddress> ssBuffer, ss2Buffer;
     BroadcastReceiver brdReceiver;
     BroadcastSender brdSender;
     StateMachine mStateMachine;
@@ -61,21 +63,19 @@ public class BroadcastManager {
         sendBroadcast(brdToSend);
     }
 
-    public void sendSS2ByLeader() {
+    public void sendSS2ByLeader(BroadcastResult bResult) {
         Message brdToSend = new Message(mStateMachine.myAddrs, mStateMachine.myAddrs, FC.SS2, 0, new Data(""));
         sendBroadcast(brdToSend);
-        mStateMachine.ss2Mode = true;
-        mStateMachine.ss2Buffer = new ArrayList<>();
-        SS2HandleTask ss2ht = new SS2HandleTask();
+        ss2Buffer = new ArrayList<>();
+        SS2HandleTask ss2ht = new SS2HandleTask(bResult);
         mTimer.schedule(ss2ht, mStateMachine.delay);
     }
 
-    public void sendSSByLeader() {
+    public void sendSSByLeader(BroadcastResult bResult) {
         Message brdToSend = new Message(mStateMachine.nextStation, mStateMachine.myAddrs, FC.SS, 0, new Data(""));
         sendBroadcast(brdToSend);
-        mStateMachine.ssMode = true;
-        mStateMachine.ssBuffer = new ArrayList<>();
-        SSHandleTask ssht = new SSHandleTask();
+        ssBuffer = new ArrayList<>();
+        SSHandleTask ssht = new SSHandleTask(bResult);
         mTimer.schedule(ssht, mStateMachine.delay);
     }
 
@@ -84,6 +84,7 @@ public class BroadcastManager {
         sendBroadcast(brdToSend);
     }
 
+    //TODO: перенести в SM
     private void onClaimTokenReceive(Message brd) {
         if (!mStateMachine.claimTokenMode) {
             sendClaimToken();
@@ -95,11 +96,6 @@ public class BroadcastManager {
         } else {
             mStateMachine.claimTokenBuffer.add(brd.sa);
         }
-    }
-
-    private void onBecomeLeader() {
-        mStateMachine.imLeader = true;
-        sendSS2ByLeader();
     }
 
     private void onSolicitSuccessorReceive(Message brd) {
@@ -153,7 +149,7 @@ public class BroadcastManager {
             sendSS2(brd.sa);
         }
         if (mStateMachine.imLeader && mStateMachine.ss2Mode) {
-            mStateMachine.ss2Buffer.add(brd.sa);
+            ss2Buffer.add(brd.sa);
         }
     }
 
@@ -170,43 +166,12 @@ public class BroadcastManager {
         }
     }
 
-    private void handleReceivedSS2() {
-        mStateMachine.ss2Mode = false;
-        ArrayList<InetAddress> ss2 = mStateMachine.ss2Buffer;
-        ss2.add(mStateMachine.myAddrs);
-        ss2.sort(new InetAddrsComparator());
-        for (int i = 0; i < ss2.size(); i++) {
-            if (ss2.get(i).equals(mStateMachine.myAddrs)) {
-                if (i != 0) {
-                    mStateMachine.nextStation = ss2.get(i - 1);
-                    break;
-                } else {
-                    mStateMachine.nextStation = ss2.get(ss2.size() - 1);
-                    break;
-                }
-            }
-        }
+    private void handleReceivedSS2(BroadcastResult bRes) {
+        bRes.onResult(ss2Buffer);
     }
 
-    private void handleReceivedSS() {
-        mStateMachine.ssMode = false;
-        ArrayList<InetAddress> ss = mStateMachine.ssBuffer;
-        if (ss.size() == 0) {
-            return;
-        }
-        ss.add(mStateMachine.myAddrs);
-        ss.sort(new InetAddrsComparator());
-        for (int i = 0; i < ss.size(); i++) {
-            if (ss.get(i).equals(mStateMachine.myAddrs)) {
-                if (i != 0) {
-                    mStateMachine.nextStation = ss.get(i - 1);
-                    break;
-                } else {
-                    mStateMachine.nextStation = ss.get(ss.size() - 1);
-                    break;
-                }
-            }
-        }
+    private void handleReceivedSS(BroadcastResult bRes) {
+        bRes.onResult(ssBuffer);
     }
 
     class BroadcastHandler implements Runnable {
@@ -250,16 +215,26 @@ public class BroadcastManager {
     }
 
     class SS2HandleTask extends TimerTask {
+        BroadcastResult bRes;
+
+        public SS2HandleTask(BroadcastResult bRes) {
+            this.bRes = bRes;
+        }
         @Override
         public void run() {
-            handleReceivedSS2();
+            handleReceivedSS2(bRes);
         }
     }
 
-    class SSHandleTask extends TimerTask {
+    private class SSHandleTask extends TimerTask {
+        BroadcastResult bRes;
+
+        public SSHandleTask(BroadcastResult bRes) {
+            this.bRes = bRes;
+        }
         @Override
         public void run() {
-            handleReceivedSS();
+            handleReceivedSS(bRes);
         }
     }
 }

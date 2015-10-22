@@ -32,10 +32,8 @@ public class BroadcastReceiver implements Runnable {
             DatagramPacket packet = new DatagramPacket(new byte[packetLen], packetLen);
             try {
                 socket.receive(packet);
-                synchronized (queue) {
-                    queue.add(parsePacket());
-                    queue.notify();
-                }
+                queue.add(parsePacket());
+                queue.notify();
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -11,41 +11,42 @@ import java.util.Arrays;
  * Created by kk1 on 15.10.2015.
  */
 public class Message {
-    InetAddress da,sa;
+    InetAddress da, sa;
     byte fc;
-    FC eFc;
+    FrameControlByte eFc;
     int len;
     public Data data;
     private String errorDa = "Invalid destination address ";
     private String errorSa = "Invalid source address ";
-    private String createDa= "create da = ";
-    private String createSa= "create sa = ";
+    private String createDa = "create da = ";
+    private String createSa = "create sa = ";
 
-    public Message(InetAddress da, InetAddress sa, byte fc, int len, Data data) {
+
+    public Message(InetAddress da, InetAddress sa, byte fc, Data data) {
         this.da = da;
         this.sa = sa;
         this.fc = fc;
 
-        if (fc == 0) eFc = FC.CT;
-        else if (fc == 1) eFc = FC.SS;
-        else if (fc == 2) eFc = FC.SS2;
-        else eFc = FC.T;
+        if (fc == 0) eFc = FrameControlByte.CT;
+        else if (fc == 1) eFc = FrameControlByte.SS;
+        else if (fc == 2) eFc = FrameControlByte.SS2;
+        else eFc = FrameControlByte.T;
 
-        this.len = len;
+        this.len = data.getLen();
         this.data = data;
     }
 
-    public Message(InetAddress da, InetAddress sa, FC ffc, int len, Data data) {
+    public Message(InetAddress da, InetAddress sa, FrameControlByte ffc, Data data) {
         this.da = da;
         this.sa = sa;
         this.eFc = ffc;
 
-        if (eFc == FC.CT) fc = 0;
-        else if (eFc == FC.SS) fc = 1;
-        else if (eFc == FC.SS2) fc = 2;
+        if (eFc == FrameControlByte.CT) fc = 0;
+        else if (eFc == FrameControlByte.SS) fc = 1;
+        else if (eFc == FrameControlByte.SS2) fc = 2;
         else fc = 3;
 
-        this.len = len;
+        this.len = data.getLen();
         this.data = data;
     }
 
@@ -62,20 +63,20 @@ public class Message {
     }
 
     private int getLength(byte[] data) {
-        return ((data[0] << 24) | (data[1] << 16) | (data[2] << 8) | (data[3]) );
+        return ((data[0] << 24) | (data[1] << 16) | (data[2] << 8) | (data[3]));
     }
 
-    private void fillField(InetAddress field, String error, int from, int to,  byte[] data, String create) {
+    private void fillField(InetAddress field, String error, int from, int to, byte[] data, String create) {
         try {
-            System.out.println(create + new String(Arrays.copyOfRange(data,1,5)));
-            da = InetAddress.getByAddress(Arrays.copyOfRange(data,5,9));
+            System.out.println(create + new String(Arrays.copyOfRange(data, 1, 5)));
+            da = InetAddress.getByAddress(Arrays.copyOfRange(data, 5, 9));
         } catch (UnknownHostException e) {
             System.out.println(error);
         }
     }
 
     public byte[] getBytes() {
-        int minLen = 1+4+4+4;
+        int minLen = 1 + 4 + 4 + 4;
         byte[] bytes = new byte[minLen + data.getLen()];
         bytes[0] = fc;
         System.arraycopy(da.getAddress(), 0, bytes, 1, 4);
@@ -87,6 +88,22 @@ public class Message {
 
     public InetAddress getDestinationAddress() {
         return da;
+    }
+
+    public InetAddress getSourceAddress() {
+        return sa;
+    }
+
+    public void setDestinationAddress(InetAddress da) {
+        this.da = da;
+    }
+
+    public boolean isToken() {
+        return eFc == FrameControlByte.T;
+    }
+
+    public boolean dataIsNull() {
+        return data.getLen() == 0;
     }
 
 }

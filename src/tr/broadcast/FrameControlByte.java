@@ -3,7 +3,7 @@ package tr.broadcast;
 /**
  * Created by ks.kochetov on 16.10.2015.
  */
-public enum FC {
+public enum FrameControlByte {
     CT,
     SS,
     SS2,

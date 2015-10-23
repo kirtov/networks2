@@ -25,6 +25,11 @@ public class TCPManager {
         tcpSender = new TCPSender(sQueue, port);
     }
 
+    public void startListening() {
+        tcpReceiver.run();
+        tcpSender.run();
+    }
+
     public void sendMessage(Message message) {
         if (sQueue.size() == 0) {
             sQueue.add(message);

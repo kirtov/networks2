@@ -17,10 +17,12 @@ public class TCPSender implements Runnable {
     ServerSocket serverSocket;
     final ConcurrentLinkedQueue<Message> sQueue;
     int portToSend;
+    InetAddress curAddr;
 
     public TCPSender(ConcurrentLinkedQueue<Message> sQueue, int portToSend) {
         this.sQueue = sQueue;
         this.portToSend = portToSend;
+        this.curAddr = null;
         try {
             serverSocket = new ServerSocket();
         } catch (IOException e) {
@@ -40,8 +42,10 @@ public class TCPSender implements Runnable {
             } else {
                 Message message = sQueue.poll();
                 try {
-                    //TODO Maybe open coonection with target
-                    serverSocket.bind(new InetSocketAddress(message.getDestinationAddress(), portToSend));
+                    if (curAddr == null || curAddr.equals(message.getDestinationAddress())) {
+                        serverSocket.bind(new InetSocketAddress(message.getDestinationAddress(), portToSend));
+                        curAddr = message.getDestinationAddress();
+                    }
                     Socket socket = serverSocket.accept();
                     OutputStream out = socket.getOutputStream();
                     out.write(message.getBytes());

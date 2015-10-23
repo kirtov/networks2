@@ -58,11 +58,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SuperManager.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="SuperManager.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/tr/SuperManager.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.8891304">
-              <caret line="121" column="53" selection-start-line="121" selection-start-column="53" selection-end-line="121" selection-end-column="53" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="41" column="5" selection-start-line="41" selection-start-column="5" selection-end-line="41" selection-end-column="5" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="method#sendMessageToSuccessor#0;class#SuperManager#0" expanded="false" />
@@ -103,11 +103,23 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="TCPSender.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="TCPSender.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/tr/tcp/TCPSender.java">
           <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.425">
+              <caret line="23" column="33" selection-start-line="23" selection-start-column="33" selection-end-line="23" selection-end-column="33" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="TCPReceiver.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/tr/tcp/TCPReceiver.java">
+          <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="35" column="34" selection-start-line="35" selection-start-column="34" selection-end-line="35" selection-end-column="34" />
+              <caret line="23" column="32" selection-start-line="23" selection-start-column="32" selection-end-line="23" selection-end-column="32" />
               <folding />
             </state>
           </provider>
@@ -182,7 +194,6 @@
         <option value="$PROJECT_DIR$/src/tr/broadcast/Broadcast.java" />
         <option value="$PROJECT_DIR$/src/tr/Data.java" />
         <option value="$PROJECT_DIR$/src/tr/broadcast/BroadcastReceiver.java" />
-        <option value="$PROJECT_DIR$/src/tr/tcp/TCPSender.java" />
         <option value="$PROJECT_DIR$/src/tr/tcp/TCPReceiver.java" />
         <option value="$PROJECT_DIR$/src/tr/broadcast/FC.java" />
         <option value="$PROJECT_DIR$/src/tr/broadcast/FrameControlByte.java" />
@@ -192,6 +203,7 @@
         <option value="$PROJECT_DIR$/src/tr/utils/BroadcastResult.java" />
         <option value="$PROJECT_DIR$/src/tr/broadcast/BroadcastManager.java" />
         <option value="$PROJECT_DIR$/src/tr/SuperManager.java" />
+        <option value="$PROJECT_DIR$/src/tr/tcp/TCPSender.java" />
       </list>
     </option>
   </component>
@@ -346,7 +358,7 @@
   <component name="PropertiesComponent">
     <property name="OverrideImplement.combined" value="true" />
     <property name="OverrideImplement.overriding.sorted" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../untitled2" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
@@ -515,7 +527,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="0" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="1" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1010,21 +1022,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/tr/tcp/TCPReceiver.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="23" column="32" selection-start-line="23" selection-start-column="32" selection-end-line="23" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/tr/tcp/TCPSender.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="35" column="34" selection-start-line="35" selection-start-column="34" selection-end-line="35" selection-end-column="34" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/tr/Data.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1121,13 +1118,31 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/tr/SuperManager.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.8891304">
-          <caret line="121" column="53" selection-start-line="121" selection-start-column="53" selection-end-line="121" selection-end-column="53" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="41" column="5" selection-start-line="41" selection-start-column="5" selection-end-line="41" selection-end-column="5" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="method#sendMessageToSuccessor#0;class#SuperManager#0" expanded="false" />
             <element signature="method#sendClaimToken#0;class#SuperManager#0" expanded="false" />
             <element signature="class#EventHandler#0;class#SuperManager#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/tr/tcp/TCPReceiver.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="23" column="32" selection-start-line="23" selection-start-column="32" selection-end-line="23" selection-end-column="32" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/tr/tcp/TCPSender.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.425">
+          <caret line="23" column="33" selection-start-line="23" selection-start-column="33" selection-end-line="23" selection-end-column="33" />
+          <folding>
+            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -9,7 +9,7 @@ import java.net.UnknownHostException;
 public class Main {
     public static void main(String[] args) {
         int broadcastPort = 1234;
-        int tcpPort = 4321;
+        int tcpPort = 12000;
         try {
             StateMachine stateMachine = new StateMachine(broadcastPort, tcpPort);
             SuperManager superManager = new SuperManager(stateMachine);

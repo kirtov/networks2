@@ -60,27 +60,27 @@ public class SuperManager {
                 @Override
                 public void onResult(ArrayList<InetAddress> resultBuffer) {
                     InetAddress addressToSend = mStateMachine.successorAddrs;
-                    if (resultBuffer.size() == 0) {
-                        return;
-                    }
-                    resultBuffer.add(mStateMachine.myAddrs);
-                    resultBuffer.sort(new InetAddrsComparator());
-                    for (int i = 0; i < resultBuffer.size(); i++) {
-                        if (resultBuffer.get(i).equals(mStateMachine.myAddrs)) {
-                            if (i != 0) {
-                                addressToSend = resultBuffer.get(i - 1);
-                                break;
-                            } else {
-                                addressToSend = resultBuffer.get(resultBuffer.size() - 1);
-                                break;
+                    if (resultBuffer.size() != 0) {
+                        resultBuffer.add(mStateMachine.myAddrs);
+                        resultBuffer.sort(new InetAddrsComparator());
+                        for (int i = 0; i < resultBuffer.size(); i++) {
+                            if (resultBuffer.get(i).equals(mStateMachine.myAddrs)) {
+                                if (i != 0) {
+                                    addressToSend = resultBuffer.get(i - 1);
+                                    break;
+                                } else {
+                                    addressToSend = resultBuffer.get(resultBuffer.size() - 1);
+                                    break;
+                                }
                             }
                         }
                     }
                     messageToSend.setDestinationAddress(addressToSend);
+                    mStateMachine.successorAddrs = addressToSend;
                     if (mStateMachine.imLeader) {
                         tcpManager.sendMessage(messageToSend);
                     }
-                    mStateMachine.imLeader = false;
+                    onBecomeNotLeader();
                 }
             });
         } else {
@@ -106,10 +106,11 @@ public class SuperManager {
                             }
                         }
                         messageToSend.setDestinationAddress(addressToSend);
+                        mStateMachine.successorAddrs = addressToSend;
                         if (mStateMachine.imLeader) {
                             tcpManager.sendMessage(messageToSend);
                         }
-                        mStateMachine.imLeader = false;
+                        onBecomeNotLeader();
                     }
                 }
             });
@@ -120,7 +121,7 @@ public class SuperManager {
      * @param ctInitiator = null, если инициатор - мы
      */
     private void sendClaimToken(InetAddress ctInitiator) {
-        mStateMachine.imLeader = false;
+        onBecomeNotLeader();
         bManager.sendClaimToken(new BroadcastResult() {
             @Override
             public void onResult(ArrayList<InetAddress> resultBuffer) {
@@ -136,8 +137,15 @@ public class SuperManager {
         });
     }
 
+    private void onBecomeNotLeader() {
+        if (mStateMachine.imLeader) {
+            System.out.println("I`M NOT LEADER");
+        }
+        mStateMachine.imLeader = false;
+    }
     private void onBecomeLeader() {
         mStateMachine.imLeader = true;
+        System.out.println("I`M LEADER");
     }
 
     private Data generateNewData() {
@@ -182,7 +190,12 @@ public class SuperManager {
             if (message.isToken()) {
                 onTokenReceive(message);
             } else {
-                sendClaimToken(message.getSourceAddress());
+                if (message.eFc == FrameControlByte.TCP_EXC) {
+                    mStateMachine.successorAddrs = null;
+                    sendMessageToSuccessor(message);
+                } else {
+                    sendClaimToken(message.getSourceAddress());
+                }
             }
         }
     }

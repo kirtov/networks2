@@ -106,18 +106,18 @@ public class BroadcastManager {
     }
 
     private void onSolicitSuccessorReceive(Message brd) {
-        if (!ssInitiatorAddrs.equals(brd.da)) {
-            ssInitiatorAddrs = brd.sa;
-        } else {
-            //Если кто-то левый(не лидер) отвечает на SS1 лидера, то мы игнорируем
-            return;
-        }
-        if (brd.sa != mStateMachine.myAddrs && brd.da != mStateMachine.myAddrs) {
-            if (between(brd.sa, brd.da)) {
-                sendSS();
+        ArrayList<InetAddress> adrs = new ArrayList<>();
+        adrs.add(brd.da);
+        adrs.add(brd.sa);
+        adrs.sort(new InetAddrsComparator());
+        if (adrs.get(0).equals(brd.da)) {
+            if (!brd.sa.equals(mStateMachine.myAddrs) && !brd.da.equals(mStateMachine.myAddrs)) {
+                if (between(brd.sa, brd.da)) {
+                    sendSS();
+                }
+            } else if (ssMode && mStateMachine.imLeader && !brd.sa.equals(mStateMachine.myAddrs)) {
+                ssBuffer.add(brd.sa);
             }
-        } else if (ssMode && mStateMachine.imLeader) {
-            ssBuffer.add(brd.sa);
         }
     }
 

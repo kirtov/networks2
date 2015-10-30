@@ -7,5 +7,6 @@ public enum FrameControlByte {
     CT,
     SS,
     SS2,
-    T
+    T,
+    TCP_EXC
 }

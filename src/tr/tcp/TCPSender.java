@@ -1,33 +1,29 @@
 package tr.tcp;
 
+import tr.broadcast.FrameControlByte;
 import tr.broadcast.Message;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Created by ss.menshov on 21.10.2015.
  */
 public class TCPSender extends Thread {
-    ServerSocket serverSocket;
+    Socket socketToSend;
     final ConcurrentLinkedQueue<Message> sQueue;
+    final ConcurrentLinkedQueue<Message> eventQueue;
     int portToSend;
     InetAddress curAddr;
+    OutputStream out;
 
-    public TCPSender(ConcurrentLinkedQueue<Message> sQueue, int portToSend) {
+    public TCPSender(ConcurrentLinkedQueue<Message> sQueue, ConcurrentLinkedQueue<Message> eventQueue, int portToSend) {
         this.sQueue = sQueue;
+        this.eventQueue = eventQueue;
         this.portToSend = portToSend;
         this.curAddr = null;
-        try {
-            serverSocket = new ServerSocket();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -44,17 +40,19 @@ public class TCPSender extends Thread {
             } else {
                 Message message = sQueue.poll();
                 try {
-                    if (curAddr == null || curAddr.equals(message.getDestinationAddress())) {
-                        serverSocket.bind(new InetSocketAddress(message.getDestinationAddress(), portToSend));
+                    if (curAddr == null || !curAddr.equals(message.getDestinationAddress()) || socketToSend.getChannel() == null) {
+                        socketToSend = new Socket(message.getDestinationAddress(), portToSend);
                         curAddr = message.getDestinationAddress();
+                        out = socketToSend.getOutputStream();
                     }
-                    Socket socket = serverSocket.accept();
-                    OutputStream out = socket.getOutputStream();
-                    System.out.println("SENDED TCP " + message.toString());
                     out.write(message.getBytes());
-                    out.flush();
+                    System.out.println("SENDED TCP " + message.toString());
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    message.eFc = FrameControlByte.TCP_EXC;
+                    eventQueue.add(message);
+                    synchronized (eventQueue) {
+                        eventQueue.notify();
+                    }
                 }
             }
         }

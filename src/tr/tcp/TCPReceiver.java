@@ -15,9 +15,11 @@ public class TCPReceiver extends Thread {
     private static final int SIZE = 1024;
     final ConcurrentLinkedQueue<Message> rQueue;
     private ServerSocket serverSocket;
+    private int portToReceive;
 
     public TCPReceiver(ConcurrentLinkedQueue<Message> rQueue, int portToReceive) {
         this.rQueue = rQueue;
+        this.portToReceive = portToReceive;
         try {
             serverSocket = new ServerSocket(portToReceive);
         } catch (IOException e) {
@@ -28,19 +30,22 @@ public class TCPReceiver extends Thread {
     @Override
     public void run() {
         byte[] data = new byte[SIZE];
-        try {
-            Socket socket = serverSocket.accept();
-            InputStream i = socket.getInputStream();
-            i.read(data);
-            Message rMessage = new Message(data);
-            System.out.println("RECEIVED TCP " + rMessage.toString());
-            rQueue.add(new Message(data));
-            synchronized (rQueue) {
-                rQueue.notify();
+        while (true) {
+            try {
+                Socket socket = serverSocket.accept();
+                InputStream i = socket.getInputStream();
+                i.read(data);
+                Message rMessage = new Message(data);
+                System.out.println("RECEIVED TCP " + rMessage.toString());
+                rQueue.add(new Message(data));
+                synchronized (rQueue) {
+                    rQueue.notify();
+                }
+                i.close();
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }

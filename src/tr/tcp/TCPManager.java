@@ -22,7 +22,7 @@ public class TCPManager {
         this.sQueue = new ConcurrentLinkedQueue<>();
         this.rQueue = rQueue;
         tcpReceiver = new TCPReceiver(rQueue, port);
-        tcpSender = new TCPSender(sQueue, port);
+        tcpSender = new TCPSender(sQueue, rQueue, port);
     }
 
     public void startListening() {

@@ -13,7 +13,7 @@ import java.util.Arrays;
 public class Message {
     InetAddress da, sa;
     byte fc;
-    FrameControlByte eFc;
+    public FrameControlByte eFc;
     int len;
     public Data data;
 

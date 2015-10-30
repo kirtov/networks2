@@ -16,7 +16,9 @@ public class StateMachine {
     public long lastBroadcast;
     public boolean imLeader;
 
-    public StateMachine() throws SocketException {
+    public StateMachine(int brPort, int tcpPort) throws SocketException {
+        this.broadcastPort = brPort;
+        this.tcpPort = tcpPort;
         successorAddrs = null;
         imLeader = false;
         NetworkInterface nw;

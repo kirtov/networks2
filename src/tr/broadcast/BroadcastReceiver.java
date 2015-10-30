@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Created by ks.kochetov on 16.10.2015.
  */
-public class BroadcastReceiver implements Runnable {
+public class BroadcastReceiver extends Thread {
     int port;
     int packetLen;
     private DatagramSocket socket;
@@ -17,8 +17,8 @@ public class BroadcastReceiver implements Runnable {
 
     public BroadcastReceiver(int port, ConcurrentLinkedQueue<Message> q) throws SocketException {
         this.queue = q;
-        socket = new DatagramSocket();
         this.port = port;
+        socket = new DatagramSocket(port);
         setPacketLen(512);
     }
 
@@ -32,15 +32,15 @@ public class BroadcastReceiver implements Runnable {
             DatagramPacket packet = new DatagramPacket(new byte[packetLen], packetLen);
             try {
                 socket.receive(packet);
-                queue.add(parsePacket());
-                queue.notify();
+                Message rMessage = new Message(packet.getData());
+                System.out.println("RECEIVED BROADCAST " + rMessage.toString());
+                queue.add(rMessage);
+                synchronized (queue) {
+                    queue.notify();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-    }
-
-    private Message parsePacket() {
-        return null;
     }
 }

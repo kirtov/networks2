@@ -26,14 +26,16 @@ public class TCPManager {
     }
 
     public void startListening() {
-        tcpReceiver.run();
-        tcpSender.run();
+        tcpReceiver.start();
+        tcpSender.start();
     }
 
     public void sendMessage(Message message) {
         if (sQueue.size() == 0) {
             sQueue.add(message);
-            sQueue.notify();
+            synchronized (sQueue) {
+                sQueue.notify();
+            }
         } else {
             sQueue.add(message);
         }

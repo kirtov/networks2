@@ -16,6 +16,7 @@ public class Message {
     FrameControlByte eFc;
     int len;
     public Data data;
+
     private String errorDa = "Invalid destination address ";
     private String errorSa = "Invalid source address ";
     private String createDa = "create da = ";
@@ -27,10 +28,7 @@ public class Message {
         this.sa = sa;
         this.fc = fc;
 
-        if (fc == 0) eFc = FrameControlByte.CT;
-        else if (fc == 1) eFc = FrameControlByte.SS;
-        else if (fc == 2) eFc = FrameControlByte.SS2;
-        else eFc = FrameControlByte.T;
+        this.eFc = byteToFC(fc);
 
         this.len = data.getLen();
         this.data = data;
@@ -50,10 +48,26 @@ public class Message {
         this.data = data;
     }
 
+    private FrameControlByte byteToFC(byte b) {
+        FrameControlByte eFc;
+        if (fc == 0) eFc = FrameControlByte.CT;
+        else if (fc == 1) eFc = FrameControlByte.SS;
+        else if (fc == 2) eFc = FrameControlByte.SS2;
+        else eFc = FrameControlByte.T;
+        return eFc;
+    }
+
     public Message(byte[] data) {
         fc = data[0];
-        fillField(da, errorDa, 1, 5, data, createDa);
-        fillField(sa, errorSa, 5, 9, data, createSa);
+        eFc = byteToFC(fc);
+        try {
+            da = InetAddress.getByAddress(Arrays.copyOfRange(data, 1, 5));
+            sa = InetAddress.getByAddress(Arrays.copyOfRange(data, 5, 9));
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            System.out.println("ERROR WHILE PARSING ADRESSES");
+        }
+
         len = getLength(Arrays.copyOfRange(data, 9, 13));
         if (len > 0) {
             this.data = new Data(new String(Arrays.copyOfRange(data, 13, 13 + len)));
@@ -64,15 +78,6 @@ public class Message {
 
     private int getLength(byte[] data) {
         return ((data[0] << 24) | (data[1] << 16) | (data[2] << 8) | (data[3]));
-    }
-
-    private void fillField(InetAddress field, String error, int from, int to, byte[] data, String create) {
-        try {
-            System.out.println(create + new String(Arrays.copyOfRange(data, 1, 5)));
-            da = InetAddress.getByAddress(Arrays.copyOfRange(data, 5, 9));
-        } catch (UnknownHostException e) {
-            System.out.println(error);
-        }
     }
 
     public byte[] getBytes() {
@@ -106,4 +111,8 @@ public class Message {
         return data.getLen() == 0;
     }
 
+    @Override
+    public String toString() {
+        return "FC = " + eFc.toString() + ", DA = " + da.toString() + " , SA = " + sa.toString();
+    }
 }

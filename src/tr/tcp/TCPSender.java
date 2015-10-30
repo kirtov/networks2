@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Created by ss.menshov on 21.10.2015.
  */
-public class TCPSender implements Runnable {
+public class TCPSender extends Thread {
     ServerSocket serverSocket;
     final ConcurrentLinkedQueue<Message> sQueue;
     int portToSend;
@@ -35,7 +35,9 @@ public class TCPSender implements Runnable {
         while (true) {
             if (sQueue.isEmpty()) {
                 try {
-                    sQueue.wait();
+                    synchronized (sQueue) {
+                        sQueue.wait();
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -48,6 +50,7 @@ public class TCPSender implements Runnable {
                     }
                     Socket socket = serverSocket.accept();
                     OutputStream out = socket.getOutputStream();
+                    System.out.println("SENDED TCP " + message.toString());
                     out.write(message.getBytes());
                     out.flush();
                 } catch (IOException e) {

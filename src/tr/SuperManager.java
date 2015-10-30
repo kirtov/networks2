@@ -34,7 +34,7 @@ public class SuperManager {
     }
 
     public void init() {
-        tcpHandler.run();
+        tcpHandler.start();
         tcpManager.startListening();
         bManager.startBroadcasting();
         mTimer = new Timer();
@@ -128,7 +128,7 @@ public class SuperManager {
                     resultBuffer.add(ctInitiator);
                 }
                 resultBuffer.sort(new InetAddrsComparator());
-                if (mStateMachine.myAddrs == resultBuffer.get(resultBuffer.size() - 1)) {
+                if (mStateMachine.myAddrs.equals(resultBuffer.get(resultBuffer.size() - 1))) {
                     onBecomeLeader();
                     sendMessageToSuccessor(new Message(null, mStateMachine.myAddrs, FrameControlByte.T, generateNewData()));
                 }
@@ -154,7 +154,7 @@ public class SuperManager {
         }
     }
 
-    class EventHandler implements Runnable {
+    class EventHandler extends Thread {
         ConcurrentLinkedQueue<Message> rQueue;
 
         public EventHandler(ConcurrentLinkedQueue<Message> rQueue) {
@@ -168,7 +168,9 @@ public class SuperManager {
                     onReceive(rQueue.poll());
                 } else {
                     try {
-                        rQueue.wait();
+                        synchronized (rQueue) {
+                            rQueue.wait();
+                        }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

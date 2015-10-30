@@ -51,11 +51,10 @@ public class BroadcastManager {
     }
 
     public void startBroadcasting() {
-        brdReceiver.run();
-        brdSender.run();
+        brdReceiver.start();
+        brdSender.start();
         BroadcastHandler handler = new BroadcastHandler();
-        Thread t = new Thread(handler);
-        t.start();
+        handler.start();
     }
 
     public void sendClaimToken(BroadcastResult bResult) {
@@ -98,7 +97,9 @@ public class BroadcastManager {
     private void onClaimTokenReceive(Message brd) {
         if (!claimTokenMode) {
             eventQueue.add(brd);
-            eventQueue.notify();
+            synchronized (eventQueue) {
+                eventQueue.notify();
+            }
         } else {
             ctBuffer.add(brd.sa);
         }
@@ -155,10 +156,10 @@ public class BroadcastManager {
     }
 
     private void onSolicitSuccessor2Receive(Message brd) {
-        if (brd.sa != mStateMachine.myAddrs && brd.sa == brd.da) {
+        if (!brd.sa.equals(mStateMachine.myAddrs) && brd.sa.equals(brd.da)) {
             sendSS2(brd.sa);
         }
-        if (mStateMachine.imLeader && ss2Mode) {
+        if (mStateMachine.imLeader && ss2Mode && !brd.sa.equals(mStateMachine.myAddrs)) {
             ss2Buffer.add(brd.sa);
         }
     }
@@ -178,7 +179,7 @@ public class BroadcastManager {
         bRes.onResult(ssBuffer);
     }
 
-    class BroadcastHandler implements Runnable {
+    class BroadcastHandler extends Thread {
         @Override
         public void run() {
             while (true) {
@@ -186,7 +187,9 @@ public class BroadcastManager {
                     handleBroadcast(rQueue.poll());
                 } else {
                     try {
-                        rQueue.wait();
+                        synchronized (rQueue) {
+                            rQueue.wait();
+                        }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

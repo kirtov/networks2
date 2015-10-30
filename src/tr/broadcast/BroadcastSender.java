@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Created by ks.kochetov on 16.10.2015.
  */
-public class BroadcastSender implements Runnable {
+public class BroadcastSender extends Thread {
     int port;
     InetAddress addrs;
     private DatagramSocket socket;
@@ -37,10 +37,13 @@ public class BroadcastSender implements Runnable {
         while (true) {
             if (!queue.isEmpty()) {
                 Message brdtoSend = queue.poll();
+                System.out.println("SENDED BROADCAST " + brdtoSend.toString());
                 sendBroadcast(brdtoSend);
             } else {
                 try {
-                    queue.wait();
+                    synchronized (queue) {
+                        queue.wait();
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

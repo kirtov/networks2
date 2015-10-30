@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Created by ss.menshov on 21.10.2015.
  */
-public class TCPReceiver implements Runnable {
+public class TCPReceiver extends Thread {
     private static final int SIZE = 1024;
     final ConcurrentLinkedQueue<Message> rQueue;
     private ServerSocket serverSocket;
@@ -32,7 +32,12 @@ public class TCPReceiver implements Runnable {
             Socket socket = serverSocket.accept();
             InputStream i = socket.getInputStream();
             i.read(data);
+            Message rMessage = new Message(data);
+            System.out.println("RECEIVED TCP " + rMessage.toString());
             rQueue.add(new Message(data));
+            synchronized (rQueue) {
+                rQueue.notify();
+            }
 
         } catch (IOException e) {
             e.printStackTrace();

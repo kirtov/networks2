@@ -191,6 +191,7 @@ public class SuperManager {
                 onTokenReceive(message);
             } else {
                 if (message.eFc == FrameControlByte.TCP_EXC) {
+                    onBecomeLeader();
                     mStateMachine.successorAddrs = null;
                     sendMessageToSuccessor(message);
                 } else {

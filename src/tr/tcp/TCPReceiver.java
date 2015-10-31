@@ -36,7 +36,7 @@ public class TCPReceiver extends Thread {
                 InputStream i = socket.getInputStream();
                 i.read(data);
                 Message rMessage = new Message(data);
-                System.out.println("RECEIVED TCP " + rMessage.toString());
+                System.out.println("RECEIVED TCP " + rMessage.toString() + " DATA = " + rMessage.data.data);
                 rQueue.add(new Message(data));
                 synchronized (rQueue) {
                     rQueue.notify();

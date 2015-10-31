@@ -1,7 +1,7 @@
 package tr;
 
 import tr.broadcast.BroadcastManager;
-import tr.broadcast.FrameControlByte;
+import tr.broadcast.ControlEventByte;
 import tr.broadcast.InetAddrsComparator;
 import tr.broadcast.Message;
 import tr.tcp.TCPManager;
@@ -47,9 +47,10 @@ public class SuperManager {
         if (!msg.dataIsNull()) {
             dataToSend = msg.data.update();
         } else {
-            dataToSend = generateNewData();
+            dataToSend = mStateMachine.lastData.update();
         }
-        Message messageToSend = new Message(null, mStateMachine.myAddrs, FrameControlByte.T, dataToSend);
+        mStateMachine.lastData = dataToSend;
+        Message messageToSend = new Message(null, mStateMachine.myAddrs, ControlEventByte.T, dataToSend);
         sendMessageToSuccessor(messageToSend);
     }
 
@@ -80,7 +81,6 @@ public class SuperManager {
                     if (mStateMachine.imLeader) {
                         tcpManager.sendMessage(messageToSend);
                     }
-                    onBecomeNotLeader();
                 }
             });
         } else {
@@ -110,7 +110,6 @@ public class SuperManager {
                         if (mStateMachine.imLeader) {
                             tcpManager.sendMessage(messageToSend);
                         }
-                        onBecomeNotLeader();
                     }
                 }
             });
@@ -122,6 +121,7 @@ public class SuperManager {
      */
     private void sendClaimToken(InetAddress ctInitiator) {
         onBecomeNotLeader();
+        mStateMachine.successorAddrs = null;
         bManager.sendClaimToken(new BroadcastResult() {
             @Override
             public void onResult(ArrayList<InetAddress> resultBuffer) {
@@ -131,7 +131,7 @@ public class SuperManager {
                 resultBuffer.sort(new InetAddrsComparator());
                 if (mStateMachine.myAddrs.equals(resultBuffer.get(resultBuffer.size() - 1))) {
                     onBecomeLeader();
-                    sendMessageToSuccessor(new Message(null, mStateMachine.myAddrs, FrameControlByte.T, generateNewData()));
+                    sendMessageToSuccessor(new Message(null, mStateMachine.myAddrs, ControlEventByte.T, mStateMachine.lastData));
                 }
             }
         });
@@ -146,10 +146,6 @@ public class SuperManager {
     private void onBecomeLeader() {
         mStateMachine.imLeader = true;
         System.out.println("I`M LEADER");
-    }
-
-    private Data generateNewData() {
-        return new Data("").update();
     }
 
     class NetworkActivityTimer extends TimerTask {
@@ -187,16 +183,19 @@ public class SuperManager {
         }
 
         private void onReceive(Message message) {
-            if (message.isToken()) {
-                onTokenReceive(message);
-            } else {
-                if (message.eFc == FrameControlByte.TCP_EXC) {
-                    onBecomeLeader();
+            switch (message.eFc) {
+                case T:
+                    onTokenReceive(message);
+                    break;
+                case TCP_EXC:
                     mStateMachine.successorAddrs = null;
                     sendMessageToSuccessor(message);
-                } else {
+                    break;
+                case TOKEN_SENDED:
+                    onBecomeNotLeader();
+                    break;
+                default:
                     sendClaimToken(message.getSourceAddress());
-                }
             }
         }
     }

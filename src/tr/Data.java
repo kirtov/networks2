@@ -24,13 +24,14 @@ public class Data {
      */
     public Data update() {
         String newData = new String(data);
-        if (newData.length() == 0) {
-            newData = "1";
-        } else {
-            int lastNum = Integer.parseInt(newData.substring(newData.length() - 1));
-            lastNum++;
-            newData = newData + lastNum;
+        int intData;
+        try {
+            intData = Integer.parseInt(newData);
+        } catch(Exception e) {
+            intData = 1;
         }
-        return new Data(newData);
+        intData++;
+        String nextData = Integer.toString(intData);
+        return new Data(nextData);
     }
 }

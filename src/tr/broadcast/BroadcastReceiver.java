@@ -33,7 +33,7 @@ public class BroadcastReceiver extends Thread {
             try {
                 socket.receive(packet);
                 Message rMessage = new Message(packet.getData());
-                System.out.println("RECEIVED BROADCAST " + rMessage.toString());
+//                System.out.println("RECEIVED BROADCAST " + rMessage.toString());
                 queue.add(rMessage);
                 synchronized (queue) {
                     queue.notify();

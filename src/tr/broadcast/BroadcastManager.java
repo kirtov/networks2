@@ -58,7 +58,7 @@ public class BroadcastManager {
     }
 
     public void sendClaimToken(BroadcastResult bResult) {
-        Message brdToSend = new Message(NULL_ADDRESS, mStateMachine.myAddrs, FrameControlByte.CT, new Data(""));
+        Message brdToSend = new Message(NULL_ADDRESS, mStateMachine.myAddrs, ControlEventByte.CT, new Data(""));
         ctBuffer = new ArrayList<>();
         sendBroadcast(brdToSend);
         claimTokenMode = true;
@@ -66,13 +66,13 @@ public class BroadcastManager {
         mTimer.schedule(ctTask, mStateMachine.broadcastWaitingTime);
     }
 
-    public void sendSS() {
-        Message brdToSend = new Message(mStateMachine.successorAddrs, mStateMachine.myAddrs, FrameControlByte.SS, new Data(""));
+    public void sendSS(InetAddress sa) {
+        Message brdToSend = new Message(sa, mStateMachine.myAddrs, ControlEventByte.SS, new Data(""));
         sendBroadcast(brdToSend);
     }
 
     public void sendSS2ByLeader(BroadcastResult bResult) {
-        Message brdToSend = new Message(mStateMachine.myAddrs, mStateMachine.myAddrs, FrameControlByte.SS2, new Data(""));
+        Message brdToSend = new Message(mStateMachine.myAddrs, mStateMachine.myAddrs, ControlEventByte.SS2, new Data(""));
         ss2Buffer = new ArrayList<>();
         sendBroadcast(brdToSend);
         ss2Mode = true;
@@ -81,7 +81,7 @@ public class BroadcastManager {
     }
 
     public void sendSSByLeader(BroadcastResult bResult) {
-        Message brdToSend = new Message(mStateMachine.successorAddrs, mStateMachine.myAddrs, FrameControlByte.SS, new Data(""));
+        Message brdToSend = new Message(mStateMachine.successorAddrs, mStateMachine.myAddrs, ControlEventByte.SS, new Data(""));
         ssBuffer = new ArrayList<>();
         sendBroadcast(brdToSend);
         ssMode = true;
@@ -90,7 +90,7 @@ public class BroadcastManager {
     }
 
     public void sendSS2(InetAddress da) {
-        Message brdToSend = new Message(da, mStateMachine.myAddrs, FrameControlByte.SS2, new Data(""));
+        Message brdToSend = new Message(da, mStateMachine.myAddrs, ControlEventByte.SS2, new Data(""));
         sendBroadcast(brdToSend);
     }
 
@@ -106,19 +106,24 @@ public class BroadcastManager {
     }
 
     private void onSolicitSuccessorReceive(Message brd) {
-        ArrayList<InetAddress> adrs = new ArrayList<>();
-        adrs.add(brd.da);
-        adrs.add(brd.sa);
-        adrs.sort(new InetAddrsComparator());
-        if (adrs.get(0).equals(brd.da)) {
-            if (!brd.sa.equals(mStateMachine.myAddrs) && !brd.da.equals(mStateMachine.myAddrs)) {
-                if (between(brd.sa, brd.da)) {
-                    sendSS();
-                }
-            } else if (ssMode && mStateMachine.imLeader && !brd.sa.equals(mStateMachine.myAddrs)) {
-                ssBuffer.add(brd.sa);
-            }
+//        ArrayList<InetAddress> adrs = new ArrayList<>();
+//        adrs.add(brd.da);
+//        adrs.add(brd.sa);
+//        adrs.sort(new InetAddrsComparator());
+//        if (adrs.get(0).equals(brd.da)) {
+        if (!ssInitiatorAddrs.equals(brd.sa)) {
+            ssInitiatorAddrs = brd.sa;
+        } else {
+            return;
         }
+        if (!brd.sa.equals(mStateMachine.myAddrs) && !brd.da.equals(mStateMachine.myAddrs)) {
+            if (between(brd.sa, brd.da)) {
+                sendSS(brd.sa);
+            }
+        } else if (ssMode && mStateMachine.imLeader && !brd.sa.equals(mStateMachine.myAddrs)) {
+            ssBuffer.add(brd.sa);
+        }
+//        }
     }
 
     private boolean between(InetAddress sa, InetAddress da) {

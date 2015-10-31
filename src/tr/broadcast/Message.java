@@ -13,7 +13,7 @@ import java.util.Arrays;
 public class Message {
     InetAddress da, sa;
     byte fc;
-    public FrameControlByte eFc;
+    public ControlEventByte eFc;
     int len;
     public Data data;
 
@@ -34,26 +34,26 @@ public class Message {
         this.data = data;
     }
 
-    public Message(InetAddress da, InetAddress sa, FrameControlByte ffc, Data data) {
+    public Message(InetAddress da, InetAddress sa, ControlEventByte ffc, Data data) {
         this.da = da;
         this.sa = sa;
         this.eFc = ffc;
 
-        if (eFc == FrameControlByte.CT) fc = 0;
-        else if (eFc == FrameControlByte.SS) fc = 1;
-        else if (eFc == FrameControlByte.SS2) fc = 2;
+        if (eFc == ControlEventByte.CT) fc = 0;
+        else if (eFc == ControlEventByte.SS) fc = 1;
+        else if (eFc == ControlEventByte.SS2) fc = 2;
         else fc = 3;
 
         this.len = data.getLen();
         this.data = data;
     }
 
-    private FrameControlByte byteToFC(byte b) {
-        FrameControlByte eFc;
-        if (fc == 0) eFc = FrameControlByte.CT;
-        else if (fc == 1) eFc = FrameControlByte.SS;
-        else if (fc == 2) eFc = FrameControlByte.SS2;
-        else eFc = FrameControlByte.T;
+    private ControlEventByte byteToFC(byte b) {
+        ControlEventByte eFc;
+        if (fc == 0) eFc = ControlEventByte.CT;
+        else if (fc == 1) eFc = ControlEventByte.SS;
+        else if (fc == 2) eFc = ControlEventByte.SS2;
+        else eFc = ControlEventByte.T;
         return eFc;
     }
 
@@ -104,7 +104,7 @@ public class Message {
     }
 
     public boolean isToken() {
-        return eFc == FrameControlByte.T;
+        return eFc == ControlEventByte.T;
     }
 
     public boolean dataIsNull() {

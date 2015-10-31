@@ -37,7 +37,7 @@ public class BroadcastSender extends Thread {
         while (true) {
             if (!queue.isEmpty()) {
                 Message brdtoSend = queue.poll();
-                System.out.println("SENDED BROADCAST " + brdtoSend.toString());
+//                System.out.println("SENDED BROADCAST " + brdtoSend.toString());
                 sendBroadcast(brdtoSend);
             } else {
                 try {

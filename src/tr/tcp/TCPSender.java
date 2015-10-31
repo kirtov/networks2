@@ -1,6 +1,6 @@
 package tr.tcp;
 
-import tr.broadcast.FrameControlByte;
+import tr.broadcast.ControlEventByte;
 import tr.broadcast.Message;
 
 import java.io.IOException;
@@ -46,9 +46,14 @@ public class TCPSender extends Thread {
                         out = socketToSend.getOutputStream();
                     }
                     out.write(message.getBytes());
-                    System.out.println("SENDED TCP " + message.toString());
+                    System.out.println("SENDED TCP " + message.toString() + " DATA = " + message.data.data);
+                    message.eFc = ControlEventByte.TOKEN_SENDED;
+                    eventQueue.add(message);
+                    synchronized (eventQueue) {
+                        eventQueue.notify();
+                    }
                 } catch (IOException e) {
-                    message.eFc = FrameControlByte.TCP_EXC;
+                    message.eFc = ControlEventByte.TCP_EXC;
                     eventQueue.add(message);
                     synchronized (eventQueue) {
                         eventQueue.notify();

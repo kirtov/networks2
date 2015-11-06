@@ -11,6 +11,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -54,7 +55,7 @@ public class SuperManager {
         sendMessageToSuccessor(messageToSend);
     }
 
-    private void sendMessageToSuccessor(Message messageToSend) {
+    private void sendMessageToSuccessor(final Message messageToSend) {
         if (!mStateMachine.imLeader) return;
         if (mStateMachine.successorAddrs != null) {
             bManager.sendSSByLeader(new BroadcastResult() {
@@ -63,7 +64,7 @@ public class SuperManager {
                     InetAddress addressToSend = mStateMachine.successorAddrs;
                     if (resultBuffer.size() != 0) {
                         resultBuffer.add(mStateMachine.myAddrs);
-                        resultBuffer.sort(new InetAddrsComparator());
+                        Collections.sort(resultBuffer, new InetAddrsComparator());
                         for (int i = 0; i < resultBuffer.size(); i++) {
                             if (resultBuffer.get(i).equals(mStateMachine.myAddrs)) {
                                 if (i != 0) {
@@ -88,12 +89,11 @@ public class SuperManager {
                 @Override
                 public void onResult(ArrayList<InetAddress> resultBuffer) {
                     if (resultBuffer.size() == 0) {
-                        //шлем SS2, пока кого-нибудь не найдем
                         sendMessageToSuccessor(messageToSend);
                     } else {
                         InetAddress addressToSend = null;
                         resultBuffer.add(mStateMachine.myAddrs);
-                        resultBuffer.sort(new InetAddrsComparator());
+                        Collections.sort(resultBuffer, new InetAddrsComparator());
                         for (int i = 0; i < resultBuffer.size(); i++) {
                             if (resultBuffer.get(i).equals(mStateMachine.myAddrs)) {
                                 if (i != 0) {
@@ -116,10 +116,7 @@ public class SuperManager {
         }
     }
 
-    /**
-     * @param ctInitiator = null, если инициатор - мы
-     */
-    private void sendClaimToken(InetAddress ctInitiator) {
+    private void sendClaimToken(final InetAddress ctInitiator) {
         onBecomeNotLeader();
         mStateMachine.successorAddrs = null;
         bManager.sendClaimToken(new BroadcastResult() {
@@ -128,7 +125,7 @@ public class SuperManager {
                 if (ctInitiator != null) {
                     resultBuffer.add(ctInitiator);
                 }
-                resultBuffer.sort(new InetAddrsComparator());
+                Collections.sort(resultBuffer, new InetAddrsComparator());
                 if (mStateMachine.myAddrs.equals(resultBuffer.get(resultBuffer.size() - 1))) {
                     onBecomeLeader();
                     sendMessageToSuccessor(new Message(null, mStateMachine.myAddrs, ControlEventByte.T, mStateMachine.lastData));

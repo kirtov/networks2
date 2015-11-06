@@ -7,7 +7,9 @@ import tr.utils.BroadcastResult;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.text.CollationElementIterator;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -24,7 +26,6 @@ public class BroadcastManager {
     BroadcastSender brdSender;
     StateMachine mStateMachine;
     Timer mTimer;
-    //если приходит SS1, то сохраняем адрес лидера, который вызвал этот процесс, чтобы ответить на этот SS1 только один раз
     InetAddress ssInitiatorAddrs;
     ConcurrentLinkedQueue eventQueue;
     boolean claimTokenMode = false;
@@ -35,10 +36,8 @@ public class BroadcastManager {
         NULL_ADDRESS = InetAddress.getByAddress(new byte[]{0, 0, 0, 0});
         this.mStateMachine = stateMachine;
         this.eventQueue = eventQueue;
-        sQueue = new ConcurrentLinkedQueue<>();
+        sQueue = new ConcurrentLinkedQueue<Message>();
         rQueue = new ConcurrentLinkedQueue<>();
-        brdReceiver = new BroadcastReceiver(stateMachine.broadcastPort, rQueue);
-        brdSender = new BroadcastSender(stateMachine.broadcastPort, sQueue);
         mTimer = new Timer();
         ssInitiatorAddrs = mStateMachine.myAddrs;
     }
@@ -50,11 +49,37 @@ public class BroadcastManager {
         }
     }
 
+    public void startBrdReceiver() {
+        try {
+            brdReceiver = new BroadcastReceiver(mStateMachine.broadcastPort, rQueue);
+            brdReceiver.start();
+        } catch (Exception e) {
+            startBrdReceiver();
+        }
+    }
+
+    public void startBrdSender() {
+        try {
+            brdSender = new BroadcastSender(mStateMachine.broadcastPort, sQueue);
+            brdSender.start();
+        } catch (Exception e) {
+            startBrdSender();
+        }
+    }
+
+    public void startBrdHandler() {
+        try {
+            BroadcastHandler handler = new BroadcastHandler(rQueue);
+            handler.start();
+        } catch (Exception e) {
+            startBrdHandler();
+        }
+    }
+
     public void startBroadcasting() {
-        brdReceiver.start();
-        brdSender.start();
-        BroadcastHandler handler = new BroadcastHandler();
-        handler.start();
+        startBrdReceiver();
+        startBrdSender();
+        startBrdHandler();
     }
 
     public void sendClaimToken(BroadcastResult bResult) {
@@ -131,7 +156,7 @@ public class BroadcastManager {
         ls.add(sa);
         ls.add(da);
         ls.add(mStateMachine.myAddrs);
-        ls.sort(new InetAddrsComparator());
+        Collections.sort(ls, new InetAddrsComparator());
         int myI = 0, saI = 0, daI = 0;
         for (int i = 0; i < ls.size(); i++) {
             if (ls.get(i).equals(sa)) {
@@ -185,6 +210,10 @@ public class BroadcastManager {
     }
 
     class BroadcastHandler extends Thread {
+        ConcurrentLinkedQueue<Message> rQueue;
+        public BroadcastHandler(ConcurrentLinkedQueue rQueue) {
+            this.rQueue = rQueue;
+        }
         @Override
         public void run() {
             while (true) {

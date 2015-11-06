@@ -11,7 +11,7 @@ public class StateMachine {
     public int broadcastPort;
     public int tcpPort;
     public int broadcastWaitingTime = 2000;
-    public int networkActivityTime = 8000;
+    public int networkActivityTime = 6000;
     public InetAddress successorAddrs, myAddrs;
     public long lastBroadcast;
     public boolean imLeader;

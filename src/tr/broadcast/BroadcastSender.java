@@ -2,6 +2,8 @@ package tr.broadcast;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -17,13 +19,16 @@ public class BroadcastSender extends Thread {
         this.port = port;
         this.queue = q;
         socket = new DatagramSocket();
-        NetworkInterface nw;
-        nw = NetworkInterface.getByName("wlan0");
-       // addrs = nw.getInterfaceAddresses().get(0).getBroadcast();
-        try {
-            addrs = InetAddress.getByName(ip);
-        }catch (UnknownHostException e) {
-
+        List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+        for (NetworkInterface i : interfaces) {
+            if (i.getHardwareAddress() != null) {
+                List<InterfaceAddress> add = i.getInterfaceAddresses();
+                for (InterfaceAddress a : add) {
+                    if (a.getBroadcast() != null) {
+                        addrs = a.getBroadcast();
+                    }
+                }
+            }
         }
     }
 

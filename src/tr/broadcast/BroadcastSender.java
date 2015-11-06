@@ -12,14 +12,19 @@ public class BroadcastSender extends Thread {
     InetAddress addrs;
     private DatagramSocket socket;
     private ConcurrentLinkedQueue<Message> queue;
-
+    private final String ip = "255.255.255.255";
     public BroadcastSender(int port, ConcurrentLinkedQueue<Message> q) throws SocketException {
         this.port = port;
         this.queue = q;
         socket = new DatagramSocket();
         NetworkInterface nw;
         nw = NetworkInterface.getByName("wlan0");
-        addrs = nw.getInterfaceAddresses().get(0).getBroadcast();
+       // addrs = nw.getInterfaceAddresses().get(0).getBroadcast();
+        try {
+            addrs = InetAddress.getByName(ip);
+        }catch (UnknownHostException e) {
+
+        }
     }
 
     public void sendBroadcast(Message brd) {

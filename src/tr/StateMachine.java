@@ -24,7 +24,8 @@ public class StateMachine {
         imLeader = false;
         NetworkInterface nw;
         nw = NetworkInterface.getByName("wlan0");
-        myAddrs = nw.getInterfaceAddresses().get(0).getAddress();
+        myAddrs = nw.getInterfaceAddresses().get(1).getAddress();
+        //myAddrs = nw.getInterfaceAddresses().get(0).getAddress();
         lastData = new Data("1");
         lastData = lastData.update();
     }

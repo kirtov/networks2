@@ -19,9 +19,6 @@ public class Data {
     }
 
 
-    /**
-     * Обрабатывает полученные данные и возвращает измененный объект
-     */
     public Data update() {
         String newData = new String(data);
         int intData;
